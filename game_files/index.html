@@ -1,0 +1,460 @@
+<!doctype html>
+<html>
+
+  <head>
+    <meta charset="utf-8">
+    <script src="two.js"></script>
+    <link rel="stylesheet" type="text/css" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Quantico&display=swap" rel="stylesheet">
+    <title>Indexes</title>
+  </head>
+
+  <h1>
+    Indexes
+  </h1>
+
+  <body>
+    <script>
+      // step 0, housekeeping not actually sure what this code does but whatever
+      var two = new Two({
+        width: 70*11,
+        height: 70*11,
+        // fullscreen: true,
+        autostart: true
+      }).appendTo(document.body);
+
+      // declare global varibles
+      var dotList;
+      var p1 = [];
+      var p2 = [];
+      var connectedPairs = [];
+      var player_rects = [];
+      var player_ractes_global = [];
+      var state = {};
+
+      // step 4, create dot object with properties
+      var dot = {
+        x: 50,
+        y: 50,
+        width: 30,
+        height: 30,
+        rounded_corner: 5,
+        color: 'orangered',
+        stroke_color: '#FF8000',
+        stroke_width: '6',
+        connectedLeft: false,
+        connectRight: false,
+        connectedTop: false,
+        connectedBottom: false
+      };
+
+      // step 4, create a function that draws one dot and a line
+      function drawDot(obj) {
+        var dot = two.makeRoundedRectangle(obj.x, obj.y, obj.width, obj.height, obj.rounded_corner);
+        dot.fill = obj.color;
+        dot.stroke = obj.stroke_color;
+        dot.linewidth = '6';
+      };
+
+      // step 5, create a function that creates a list of dots and store the dots in an array
+      function createDotList(dot) {
+        x_step = 70;
+        y_step = 70;
+        z = 0;
+        numDots = 10;
+        dotList = [];
+        temp_dot = dot;
+
+        for (var i=1;i<=numDots;i++) {
+          temp_dot.x = i*x_step;
+          for(var j=1;j<=numDots;j++) {
+            temp_dot.y = j * y_step;
+            // store each dot object (with it's properties) in an array;
+            dotList[z] = {
+              x: temp_dot.x,
+              y: temp_dot.y,
+              width: temp_dot.width,
+              height: temp_dot.height,
+              rounded_corner: temp_dot.rounded_corner,
+              color: temp_dot.color,
+              stroke_color: temp_dot.stroke_color,
+              stroke_width: temp_dot.stroke_width,
+              connectedLeft: temp_dot.connectedLeft,
+              connectRight: temp_dot.connectRight,
+              connectedTop: temp_dot.connectedTop,
+              connectedBottom: temp_dot.connectedBottom,
+              index: z
+            };
+              z += 1
+          };
+        };
+      };
+
+      // step 6, create function that draws all dots
+      function drawDotList(List) {
+        for (var i=0; i<List.length; i++) {
+          drawDot(List[i]);
+        };
+      };
+
+      // color of dot the player clicked on
+      function playerClickedBlue(i,list) {
+        if (dotList[indexOfSelectedDot].color == "blue") {
+          return true
+        }
+        else {
+          return false
+        }
+      };
+
+      // color of dor the player clicked on
+      function playerClickedOrange(i,list) {
+        if (dotList[indexOfSelectedDot].color == "orangered") {
+          return true
+        }
+        else {
+          return false
+        }
+      };
+
+      // step 7, call start up functions
+      createDotList(dot);
+      drawDotList(dotList);
+
+      player1 = {
+        rect_color: "#90EE90",
+        score: 0,
+        line_color: "#D3D5D6"
+      };
+
+      player2 = {
+        rect_color: "#c9bfff", // blue voilet
+        score: 0,
+        line_color: "#D3D5D6"
+      };
+
+      player1_turn = true;
+
+      rect_count_turn_start = player_rects.length;
+
+
+      // step 8, handle click event
+      window.addEventListener('mousedown', function(mouse_position) {
+
+        console.log('player turn start')
+        console.log('player1_turn: ' + player1_turn)
+
+        // on click get mouseX and mouseY
+        var w = window.innerWidth;
+        var h = window.innerHeight;
+        mouseX = mouse_position.clientX - (w-770)/2;
+        mouseY = mouse_position.clientY - (h-770)/2;
+
+        console.log(mouseX)
+        console.log(mouseY)
+
+        indexOfSelectedDot = dotIndex(mouseX, mouseY);
+
+        // if player clicks whitespace do nothing
+        if (indexOfSelectedDot == null) {
+          {}
+        }
+
+        // if player clicks on a dot
+        else if (indexOfSelectedDot != null) {
+
+          rect_indexes_start = player_rects;
+          dotColor = dotList[indexOfSelectedDot].color;
+
+            if (playerClickedBlue(dotColor, dotList)) {
+              second_clicked = dotList[indexOfSelectedDot];
+              // lines drawn
+              p1.push([first_clicked.x, first_clicked.y]);
+              p2.push([second_clicked.x, second_clicked.y]);
+
+              // dots connected
+              connectedPairs.push([first_clicked.index, second_clicked.index]);
+              // check surronding rectangles
+              wasRectFormed(getIndexesOfSurrondingDots(indexOfSelectedDot), indexOfSelectedDot, connectedPairs, player1_turn);
+
+              rect_count_turn_end = player_rects.length;
+              rect_indexes_end = player_rects;
+              diff = rect_count_turn_end - rect_count_turn_start;
+              console.log(diff)
+
+              if ( diff > 0) {
+                indexes_given_to_current_player = getUniqueIndexes(rect_indexes_start, rect_indexes_end, player1_turn)
+                rect_count_turn_start = player_rects.length
+              }
+
+              else if ( diff == 0 ) {
+                rect_count_turn_start = player_rects.length
+                player1_turn = !player1_turn;
+                console.log('player turn end')
+              }
+
+              makeBlueDotsNormal(dotList);
+            }
+
+            else if (playerClickedOrange(dotColor, dotList)) {
+              getIndexesOfSurrondingDots(indexOfSelectedDot);
+              dontShowDotsAlreadyConnected(choice, connectedPairs, indexOfSelectedDot);
+              first_clicked = dotList[indexOfSelectedDot];
+              makeBlueDotsNormal(dotList)
+              showOptions(choice);
+            };
+        };
+
+        two.clear();
+        drawLines(p1,p2);
+        drawPlayerRects(player_rects, dotList, state, dot) // bg rects go here
+        drawDotList(dotList);
+        
+        // two.makeLine(0, 0, 70*11, 70*11)
+
+      })
+
+      function getUniqueIndexes(a1, a2, current_player) {
+          var a = [], diff = [];
+          for (var i = 0; i < a1.length; i++) {
+              a[a1[i]] = true;
+          }
+          for (var i = 0; i < a2.length; i++) {
+              if (a[a2[i]]) {
+                  delete a[a2[i]];
+              } else {
+                  a[a2[i]] = true;
+              }
+          }
+          for (var k in a) {
+              diff.push(k);
+          }
+          for (var z=0; z<diff.length; z++) {
+            dotList[diff[z]].player1_gets_score = current_player;
+          }
+        return diff;
+      }
+
+      function drawPlayerRects(arg1_indexes, arg2_dotList, arg3_state, arg4_orginal_dot) {
+        for (k=0; k<arg1_indexes.length; k++) {
+
+          x_coord = arg2_dotList[arg1_indexes[k]].x + 70/2;
+          y_coord = arg2_dotList[arg1_indexes[k]].y + 70/2;
+          _width = arg4_orginal_dot.width + 70/2 - 20;
+          _heigth = arg4_orginal_dot.height + 70/2 - 20;
+
+          if (arg2_dotList[arg1_indexes[k]].player1_gets_score == true) {
+            var score_dot = two.makeRoundedRectangle(x_coord, y_coord, _width, _heigth, 0);
+            score_dot.fill = player1.rect_color;
+            score_dot.stroke = player1.line_color;
+            score_dot.linewidth = '5';
+          }
+          else if (arg2_dotList[arg1_indexes[k]].player1_gets_score == false) {
+            var score_dot = two.makeRoundedRectangle(x_coord, y_coord, _width, _heigth, 0);
+            score_dot.fill = player2.rect_color;
+            score_dot.stroke = player2.line_color;
+            score_dot.linewidth = '5';
+          }
+        }
+      }
+
+      function wasRectFormed(surronding_index, current_index, line_pairs, current_player) {
+
+        bottom_row_indexes = [];
+        right_row_indexes = [];
+
+        first_time = true
+
+        if (first_time) {
+          line_pairs_to_string = [];
+          first_time = false;
+        }
+
+        if (line_pairs.length > 0) {
+          for (j=0; j<line_pairs.length; j++) {
+            temp_str = line_pairs[j].toString();
+            line_pairs_to_string.push(temp_str);
+          }
+        }
+
+        for (var j=1; j <= numDots; j++) {
+          bottom_row_indexes.push(j*10-1);
+        }
+
+        for (var k=0; k<numDots; k++) {
+          right_row_indexes.push(numDots*numDots-10+k);
+        }
+
+        indexes_not_to_check = bottom_row_indexes.concat(right_row_indexes);
+        player_rects = [];
+
+        for (z=0; z<= numDots*numDots-1; z++) {
+          if (indexes_not_to_check.includes(z) == false) {
+
+            c1 = [z, z+1].toString();
+            c1_rev = [z, z+1].reverse().toString();
+
+            c2 = [z+11, z+10].toString();
+            c2_rev = [z+11, z+10].reverse().toString();
+
+            c3 = [z+1, z+11].toString();
+            c3_rev = [z+1, z+11].reverse().toString() ;
+
+            c4 = [z+10, z].toString();
+            c4_rev = [z+10, z].reverse().toString() ;
+
+            if (
+              ( (line_pairs_to_string.includes(c1) == true) || (line_pairs_to_string.includes(c1_rev) == true) ) &&
+              ( (line_pairs_to_string.includes(c2) == true) || (line_pairs_to_string.includes(c2_rev) == true) ) &&
+              ( (line_pairs_to_string.includes(c3) == true) || (line_pairs_to_string.includes(c3_rev) == true) ) &&
+              ( (line_pairs_to_string.includes(c4) == true) || (line_pairs_to_string.includes(c4_rev) == true) )) {
+                player_rects.push(z);
+            }
+          }
+        }
+        right_row = []
+        player_rects_final = []
+      }
+
+      function dontShowDotsAlreadyConnected(array_choices, array_connected_pairs, current_index) {
+
+        temp = [];
+
+        function removeItemOnce(arr, value) {
+          var index = arr.indexOf(value);
+          if (index > -1) {
+            arr.splice(index, 1);
+          }
+          return arr;
+        }
+
+        for (var z=0; z < array_choices.length; z++) {
+          n1 = [current_index, array_choices[z]];
+          n2 = [array_choices[z], current_index];
+          temp.push(n1);
+          temp.push(n2);
+        }
+
+        for ( var i=0; i < array_connected_pairs.length; i++)
+          {
+            for (z=0; z< temp.length; z++) {
+              if (array_connected_pairs[i].toLocaleString() == temp[z].toLocaleString()) {
+
+                all_values = [].concat(array_connected_pairs[i], temp[z])
+                uniqueItems = Array.from(new Set(all_values))
+
+                for (k=0; k<uniqueItems.length; k++) {
+                  if (uniqueItems[k] != current_index) {
+                    item_to_remove = uniqueItems[k]
+                  }
+                }
+              removeItemOnce(array_choices, item_to_remove);
+              }
+            }
+         }
+       }
+
+      function dotIndex(mouseX, mouseY) {
+        for (var i=0; i<dotList.length; i++) {
+          x_right = dotList[i].x + dotList[i].width/2 - dotList[i].stroke_width/2;
+          x_left = dotList[i].x - dotList[i].width/2 + dotList[i].stroke_width/2,
+          y_top = dotList[i].y - dotList[i].height/2 + dotList[i].stroke_width/2;
+          y_bottom = dotList[i].y + dotList[i].height/2 - dotList[i].stroke_width/2;
+          if ((mouseX < x_right) && (mouseY > y_top) && (mouseX > x_left) && (mouseY < y_bottom)) {
+            return i;
+            break;
+          };
+        };
+      };
+
+      function getIndexesOfSurrondingDots(index) {
+        // if player selects top left corner
+        if (index == 0) {
+          choice = [index + numDots, index + 1];
+        }
+
+        // if player selects bottom left corner
+        else if (index == (numDots-1)) {
+          choice = [index - 1, index + numDots];
+        }
+
+        // if plater selects top right
+        else if (index == (numDots * (numDots - 1))) {
+          choice = [index - numDots, index + 1];
+        }
+
+        // if plater selects bottom right
+        else if (index == (numDots * numDots - 1)) {
+          choice = [index - numDots, index - 1];
+        }
+
+        // if plater selects top row
+        else if ( (index>0) && (index%10 ==0) ) {
+          choice = [index - numDots, index + numDots, index + 1];
+        }
+
+        // if plater selects bottom row
+        else if ( (index > numDots-1) && (index < (numDots*numDots-1)) && ((index+1)%10 == 0) ) {
+          choice = [index + numDots, index - numDots, index - 1];
+        }
+
+        // if plater selects left row
+        else if ( (index > 0) &&  (index < (numDots-1)) ) {
+          choice = [index -1, index + numDots, index + 1];
+        }
+
+        // if plater selects right row
+        else if ( (index > (numDots*(numDots-1))) &&  (index < numDots* numDots - 1) ) {
+          choice = [index - 1, index - numDots, index + 1];
+        }
+
+        // if player selects any other dot
+        else if (index != null) {
+          choice = [index -1, index +1, index + numDots, index - numDots];
+        }
+
+        else if (index == null) {
+          choice = "clicked whitespace, low key this should never print";
+        }
+
+        return choice;
+      }
+
+      // function for showing blue dots
+      function showOptions(array) {
+        if (array != "clicked whitespace") {
+          for (var i=0; i<array.length; i++) {
+            dotList[array[i]].width *= 1.3;
+            dotList[array[i]].height *= 1.3;
+            dotList[array[i]].color = "blue";
+          };
+        };
+      };
+
+      // function for going back to normal
+      function makeBlueDotsNormal(array) {
+        for (var i=0; i<array.length; i++) {
+          if (array[i].color == "blue") {
+            array[i].width *= (1/1.3);
+            array[i].height *= (1/1.3);
+            array[i].color = 'orangered';
+          };
+        };
+      };
+
+      function drawLine(arg1, arg2) {
+        var line = two.makeLine(arg1[0], arg1[1], arg2[0], arg2[1]);
+        line.linewidth = 10;
+        line.stroke = "#5DADE2";
+        //two.makeLine(arg1[0], arg1[1], arg2[0], arg2[1]);
+      };
+
+      function drawLines(arg1, arg2) {
+        for (var i=0; i<arg1.length; i++) {
+          drawLine(arg1[i],arg2[i]);
+        }
+      }
+
+    </script>
+  </body>
+</html>
