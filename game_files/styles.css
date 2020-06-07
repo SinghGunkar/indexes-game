@@ -1,7 +1,9 @@
 h1 {
-  text-align: center;
+  text-align: left;
   font-family: 'Quantico', sans-serif;
   color: grey;
+  padding-left: 30px;
+  padding-bottom: 30px;
 }
 
 h3 {
@@ -35,4 +37,8 @@ svg {
 ::selection {
   background-color: transparent;
   color: grey;
+}
+
+body {
+  background-image: linear-gradient(to right, rgba(255,0,0,0), rgb(255, 9, 71, 0.2));
 }
