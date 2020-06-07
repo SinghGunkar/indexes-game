@@ -4,6 +4,17 @@ h1 {
   color: grey;
 }
 
+h3 {
+  text-align: left;
+  font-family: 'Quantico', sans-serif;
+  color: grey;
+  font-size: 25px;
+  padding-left: 30px;
+  padding-right: 30px;
+  padding-bottom: 30px;
+  position: relative;
+}
+
 svg {
   position: absolute;
   top: 50%;

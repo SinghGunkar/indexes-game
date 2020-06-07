@@ -13,6 +13,18 @@
     Indexes
   </h1>
 
+  <h3 id="player_turn">
+    Player turn: P1
+  </h3>
+
+  <h3 id="player1_score">
+    P1 score: 0
+  </h3>
+
+  <h3 id="player2_score">
+    P2 score: 0
+  </h3>
+
   <body>
     <script>
       // step 0, housekeeping not actually sure what this code does but whatever
@@ -130,28 +142,21 @@
       player2 = {
         rect_color: "#c9bfff", // blue voilet
         score: 0,
-        line_color: "#D3D5D6"
+        line_color: "#D3D5D6",
       };
 
       player1_turn = true;
 
       rect_count_turn_start = player_rects.length;
 
-
       // step 8, handle click event
       window.addEventListener('mousedown', function(mouse_position) {
-
-        console.log('player turn start')
-        console.log('player1_turn: ' + player1_turn)
 
         // on click get mouseX and mouseY
         var w = window.innerWidth;
         var h = window.innerHeight;
         mouseX = mouse_position.clientX - (w-770)/2;
         mouseY = mouse_position.clientY - (h-770)/2;
-
-        console.log(mouseX)
-        console.log(mouseY)
 
         indexOfSelectedDot = dotIndex(mouseX, mouseY);
 
@@ -168,28 +173,34 @@
 
             if (playerClickedBlue(dotColor, dotList)) {
               second_clicked = dotList[indexOfSelectedDot];
+
               // lines drawn
               p1.push([first_clicked.x, first_clicked.y]);
               p2.push([second_clicked.x, second_clicked.y]);
 
               // dots connected
               connectedPairs.push([first_clicked.index, second_clicked.index]);
+
               // check surronding rectangles
               wasRectFormed(getIndexesOfSurrondingDots(indexOfSelectedDot), indexOfSelectedDot, connectedPairs, player1_turn);
 
               rect_count_turn_end = player_rects.length;
               rect_indexes_end = player_rects;
               diff = rect_count_turn_end - rect_count_turn_start;
-              console.log(diff)
 
               if ( diff > 0) {
                 indexes_given_to_current_player = getUniqueIndexes(rect_indexes_start, rect_indexes_end, player1_turn)
                 rect_count_turn_start = player_rects.length
+                CalculatePlayerScore(dotList)
+                updatePlayerScore(CalculatePlayerScore(dotList))
               }
 
               else if ( diff == 0 ) {
                 rect_count_turn_start = player_rects.length
+                CalculatePlayerScore(dotList) 
+                updatePlayerScore(CalculatePlayerScore(dotList))
                 player1_turn = !player1_turn;
+                updatePlayerTurn()
                 console.log('player turn end')
               }
 
@@ -213,6 +224,35 @@
         // two.makeLine(0, 0, 70*11, 70*11)
 
       })
+
+      function CalculatePlayerScore(dot_array) {
+        score_array = [0,0]
+        for (var i = 0; i < dot_array.length; i++) {
+          if (dot_array[i].player1_gets_score == false) {
+            score_array [0] = score_array [0]+1
+          }
+          else if (dot_array[i].player1_gets_score == true)
+            score_array [1] = score_array [1]+1
+        }
+        return score_array
+      }
+
+      function updatePlayerScore(score_array) {
+        console.log(score_array)
+        document.getElementById("player1_score").innerHTML = 'P1 score: ' + score_array[1] 
+        document.getElementById("player2_score").innerHTML = 'P2 score: ' + score_array[0] 
+        console.log(player1_turn)
+      }
+
+      function updatePlayerTurn() {
+
+        // console.log(player1_turn)
+        if (player1_turn == false) {
+          document.getElementById("player_turn").innerHTML = 'Player turn: P2'
+        } else if (player1_turn == true) {
+          document.getElementById("player_turn").innerHTML = 'Player turn: P1'
+        }
+      }
 
       function getUniqueIndexes(a1, a2, current_player) {
           var a = [], diff = [];
@@ -416,7 +456,6 @@
         else if (index == null) {
           choice = "clicked whitespace, low key this should never print";
         }
-
         return choice;
       }
 
