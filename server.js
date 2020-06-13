@@ -1,13 +1,43 @@
+'use strict'
+
+const http = require('http')
 const express = require('express')
+const socketio = require('socket.io')
+const Game = require('./game')
 
 const app = express()
-app.use(express.static('game_files'))
 
-app.get('/', function(request, response){
-    response.sendFile(__dirname + '/game_files/index.html');
-    console.log('test')
-});
+const clientPath = `${__dirname}/game_files`
+console.log(`Serving static from ${clientPath}`)
 
-app.listen(3000, function () {
-console.log('Example app listening on port 3000!');
-});
+app.use(express.static(clientPath))
+
+const server = http.createServer(app)
+
+const io = socketio(server)
+
+let waitingPlayer = null
+
+io.on('connection', (socket) => {
+    console.log(`Socket with id ${socket.id} has connected`)
+
+    if (waitingPlayer) {
+        // start a game
+        new Game(waitingPlayer, socket)
+        waitingPlayer = null
+    } else {
+        waitingPlayer = socket
+        waitingPlayer.emit('waitMessage', 'Waiting for an opponent')
+    }
+})
+
+server.on('error', (err) => {
+    console.log("Server error:")
+})
+
+const PORT = process.env.PORT || 3000
+
+server.listen(PORT, () => {
+    console.log(`Listening on ${PORT}`)
+    console.log('______________________')
+})

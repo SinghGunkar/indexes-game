@@ -26,7 +26,16 @@
   </h3>
   
   <body>
+    <script src="/socket.io/socket.io.js"></script>
     <script>
+
+      // socket stuff
+      var socket = io()
+
+      socket.on('welcome', (msg) => {
+        console.log(msg)
+      })
+
       // step 0, housekeeping not actually sure what this code does but whatever
       var two = new Two({
         width: 70*11,
@@ -37,8 +46,8 @@
 
       // declare global varibles
       var dotList;
-      var p1 = [];
-      var p2 = [];
+      var p1 = []; 
+      var p2 = []; 
       var connectedPairs = [];
       var player_rects = [];
       var player_ractes_global = [];
@@ -212,7 +221,14 @@
               dontShowDotsAlreadyConnected(choice, connectedPairs, indexOfSelectedDot);
               first_clicked = dotList[indexOfSelectedDot];
               makeBlueDotsNormal(dotList)
-              showOptions(choice);
+              showOptions(choice); 
+
+              //*********************//
+              
+              // something goes here
+
+              //*********************//
+
             };
         };
 
@@ -238,7 +254,6 @@
       }
 
       function updatePlayerScore(score_array) {
-        console.log(score_array)
         document.getElementById("player1_score").innerHTML = 'P1 score: ' + score_array[1] 
         document.getElementById("player2_score").innerHTML = 'P2 score: ' + score_array[0] 
         console.log(player1_turn)
