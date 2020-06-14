@@ -9,13 +9,19 @@ class Game {
         this._scores = [0, 0]
         this._startlogic()
         this._serverListeners()
-        this._playerTurns = [true, true]
+        this._playerTurns = [true, false]
     }
 
     _startlogic() {
+
+        // Send welcome message
         this._players.forEach((player) => {
             player.emit('welcome', 'Two players have joined, start game!')
         })
+
+        // Set up player turns
+        this._players[0].emit('player1', 'You are P1')
+        this._players[1].emit('player2', 'You are P2')
     }
 
     _serverListeners() {

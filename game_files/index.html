@@ -15,7 +15,11 @@
 
   <h5 id="status">
     Waiting for opponent...
-  </h1>
+  </h5>
+
+  <h5 id="you_are">
+    <!-- Server will handle -->
+  </h5>
 
   <h3 id="player_turn">
     Player turn: P1
@@ -33,12 +37,20 @@
     <script src="/socket.io/socket.io.js"></script>
     <script>
 
-      // socket stuff
+      //********************* multiplayer support *********************//
       var socket = io()
 
       socket.on('welcome', (msg) => {
         document.getElementById("status").innerHTML = 'Player joined, play game!'
       })
+
+      socket.on('player1', (text) => {
+        document.getElementById("you_are").innerHTML = text
+      })
+      socket.on('player2', (text) => {
+        document.getElementById("you_are").innerHTML = text
+      })
+      //********************* multiplayer support *********************//
 
       // step 0, housekeeping not actually sure what this code does but whatever
       var two = new Two({
