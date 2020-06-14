@@ -211,6 +211,12 @@
         updatePlayerScore(CalculatePlayerScore(dotList))
       })
 
+      socket.on('turnChange', (boolean) => {
+        player1_turn = boolean
+        updatePlayerTurn()
+        console.log('testasdfkjadsh')
+      })
+
       //********************* multiplayer support *********************//
 
       // step 8, handle click event
@@ -265,6 +271,11 @@
                 CalculatePlayerScore(dotList) 
                 updatePlayerScore(CalculatePlayerScore(dotList))
                 player1_turn = !player1_turn;
+
+                //********************* multiplayer support *********************//
+                socket.emit('turnChange', player1_turn)
+                //********************* multiplayer support *********************//
+                
                 updatePlayerTurn()
                 console.log('player turn end')
               }

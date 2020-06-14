@@ -29,6 +29,7 @@ class Game {
         this._drawPlayerRects()
         this._drawDotList()
         this._connectedPairs()
+        this._turnChange()
     }
 
     _drawLines() {
@@ -75,6 +76,16 @@ class Game {
             }
         })
         return $_otherPlayer
+    }
+
+    _turnChange() {
+        this._players.forEach((player) => {
+            player.on('turnChange', (bool) => {
+                this._players.forEach((player) => {
+                    player.emit('turnChange', bool)
+                })
+            })
+        })
     }
 }
 
