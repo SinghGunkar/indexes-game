@@ -7,9 +7,9 @@ class Game {
         this._players = [firstPlayer, secondPlayer]
         this._playersID = [firstPlayer.id, secondPlayer.id]
         this._scores = [0, 0]
-        this._data = {}
         this._startlogic()
         this._serverListeners()
+        this._playerTurns = [true, true]
     }
 
     _startlogic() {
@@ -19,23 +19,56 @@ class Game {
     }
 
     _serverListeners() {
-        this._serverShowOptions()
+        this._drawLines()
+        this._drawPlayerRects()
+        this._drawDotList()
+        this._connectedPairs()
     }
 
-    _serverShowOptions() {
+    _drawLines() {
         this._players.forEach((player) => {
-            player.on('showOptions', (data) => {
-                this._data = data
-                this._serverEmitShowOptions()
+            player.on('drawLines', (p1, p2) => {
+                const playerToEmitTo = this._getOtherPlayer(player) 
+                playerToEmitTo.emit('drawLines', p1, p2)             
             })
         })
     }
 
-    _serverEmitShowOptions() {
+    _drawPlayerRects() {
         this._players.forEach((player) => {
-            player.emit('showOptionsFromServer', 'test')
-            console.log(`${player.id} has emitted and event`)
+            player.on('drawPlayerRects', (player_rects, dotList, state, dot) => {
+                const playerToEmitTo = this._getOtherPlayer(player) 
+                playerToEmitTo.emit('drawPlayerRects', player_rects, dotList, state, dot)             
+            })
         })
+    }
+
+    _drawDotList() {
+        this._players.forEach((player) => {
+            player.on('drawDotList', (dotList) => {
+                const playerToEmitTo = this._getOtherPlayer(player) 
+                playerToEmitTo.emit('drawDotList', dotList)             
+            })
+        })
+    }
+
+    _connectedPairs() {
+        this._players.forEach((player) => {
+            player.on('connectedPairs', (obj) => {
+                const playerToEmitTo = this._getOtherPlayer(player) 
+                playerToEmitTo.emit('connectedPairs', obj)             
+            })
+        })
+    }
+
+    _getOtherPlayer(currentPlayer) {
+        var $_otherPlayer
+        this._players.forEach((player) => {
+            if (currentPlayer.id != player.id) {
+                $_otherPlayer = player
+            }
+        })
+        return $_otherPlayer
     }
 }
 

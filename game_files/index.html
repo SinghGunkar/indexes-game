@@ -9,8 +9,12 @@
     <title>Indexes</title>
   </head>
 
-  <h1>
+  <h1 id="title">
     Indexes
+  </h1>
+
+  <h5 id="status">
+    Waiting for opponent...
   </h1>
 
   <h3 id="player_turn">
@@ -33,7 +37,7 @@
       var socket = io()
 
       socket.on('welcome', (msg) => {
-        console.log(msg)
+        document.getElementById("status").innerHTML = 'Player joined, play game!'
       })
 
       // step 0, housekeeping not actually sure what this code does but whatever
@@ -158,6 +162,45 @@
 
       rect_count_turn_start = player_rects.length;
 
+      //********************* multiplayer support *********************//
+
+      socket.on('connectedPairs', (obj$) => {
+        console.log(`${socket.id} should receive pairs event`)
+        connectedPairs = obj$
+      })
+
+      socket.on('drawLines', (p1$, p2$) => {
+        console.log(`${socket.id} should receive drawLines event`)
+        p1 = p1$
+        p2 = p2$
+        // drawLines(p1,p2)
+      })
+
+      socket.on('drawPlayerRects', (player_rects$, dotList$, state$, dot$) => {
+        console.log(`${socket.id} should receive drawPlaterRects event`)
+        player_rects = player_rects$
+        dotList = dotList$
+        state = state$
+        dot = dot$
+        // two.clear()
+        // drawPlayerRects(player_rects, dotList, state, dot)
+      })
+
+      socket.on('drawDotList', (dotList$) => {
+        console.log(`${socket.id} should receive drawDotList event`)
+        dotList = dotList$
+
+        two.clear();
+        drawLines(p1,p2);
+        drawPlayerRects(player_rects, dotList, state, dot) // bg rects go here
+        drawDotList(dotList);
+
+        CalculatePlayerScore(dotList) 
+        updatePlayerScore(CalculatePlayerScore(dotList))
+      })
+
+      //********************* multiplayer support *********************//
+
       // step 8, handle click event
       window.addEventListener('mousedown', function(mouse_position) {
 
@@ -189,6 +232,7 @@
 
               // dots connected
               connectedPairs.push([first_clicked.index, second_clicked.index]);
+              socket.emit('connectedPairs', connectedPairs)
 
               // check surronding rectangles
               wasRectFormed(getIndexesOfSurrondingDots(indexOfSelectedDot), indexOfSelectedDot, connectedPairs, player1_turn);
@@ -223,21 +267,20 @@
               makeBlueDotsNormal(dotList)
               showOptions(choice); 
 
-              //*********************//
-              
-              // something goes here
-
-              //*********************//
-
             };
         };
+
+        //********************* multiplayer support *********************//
+        socket.emit('drawLines', p1, p2)
+        socket.emit('drawPlayerRects', player_rects, dotList, state, dot)
+        socket.emit('drawDotList', dotList)  
+        console.log(`${socket.id} emited three events`)   
+        //********************* multiplayer support *********************//
 
         two.clear();
         drawLines(p1,p2);
         drawPlayerRects(player_rects, dotList, state, dot) // bg rects go here
         drawDotList(dotList);
-        
-        // two.makeLine(0, 0, 70*11, 70*11)
 
       })
 
@@ -256,7 +299,6 @@
       function updatePlayerScore(score_array) {
         document.getElementById("player1_score").innerHTML = 'P1 score: ' + score_array[1] 
         document.getElementById("player2_score").innerHTML = 'P2 score: ' + score_array[0] 
-        console.log(player1_turn)
       }
 
       function updatePlayerTurn() {

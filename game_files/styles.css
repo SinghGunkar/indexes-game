@@ -3,7 +3,8 @@ h1 {
   font-family: 'Quantico', sans-serif;
   color: grey;
   padding-left: 30px;
-  padding-bottom: 30px;
+  padding-bottom: 5px;
+  margin-bottom: 5px;
 }
 
 h3 {
@@ -15,6 +16,18 @@ h3 {
   padding-right: 30px;
   padding-bottom: 30px;
   position: relative;
+}
+
+h5 {
+  text-align: left;
+  font-family: 'Quantico', sans-serif;
+  color: grey;
+  font-size: 15px;
+  padding-left: 30px;
+  padding-right: 30px;
+  padding-bottom: 30px;
+  position: relative;
+  margin-top: 2px;
 }
 
 svg {
