@@ -19,7 +19,7 @@ class Game {
             player.emit('welcome', 'Two players have joined, start game!')
         })
 
-        // Set up player turns
+        // Set up players
         this._players[0].emit('player1', 'You are P1')
         this._players[1].emit('player2', 'You are P2')
     }
