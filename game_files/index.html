@@ -182,20 +182,21 @@
       //********************* multiplayer support *********************//
 
       socket.on('connectedPairs', (obj$) => {
-        console.log(`${socket.id} should receive pairs event`)
+        //console.log(`${socket.id} should receive pairs event`)
         connectedPairs = obj$
       })
 
       socket.on('drawLines', (p1$, p2$) => {
-        console.log(`${socket.id} should receive drawLines event`)
+        //console.log(`${socket.id} should receive drawLines event`)
         p1 = p1$
         p2 = p2$
         // drawLines(p1,p2)
       })
 
       socket.on('drawPlayerRects', (player_rects$, dotList$, state$, dot$) => {
-        console.log(`${socket.id} should receive drawPlaterRects event`)
+        //console.log(`${socket.id} should receive drawPlaterRects event`)
         player_rects = player_rects$
+        rect_count_turn_start = player_rects$.length
         dotList = dotList$
         state = state$
         dot = dot$
@@ -204,7 +205,7 @@
       })
 
       socket.on('drawDotList', (dotList$) => {
-        console.log(`${socket.id} should receive drawDotList event`)
+        // console.log(`${socket.id} should receive drawDotList event`)
         dotList = dotList$
 
         two.clear();
@@ -227,180 +228,183 @@
       window.addEventListener('mousedown', function(mouse_position) {
 
         //********************* multiplayer support *********************//  
-        console.log(player_set_by_server)
-        console.log(player1_turn)
 
         if (player_set_by_server == 'You are P1' && player1_turn == true) {
-          console.log('player 1 turn')
           // on click get mouseX and mouseY
-        var w = window.innerWidth;
-        var h = window.innerHeight;
-        mouseX = mouse_position.clientX - (w-770)/2;
-        mouseY = mouse_position.clientY - (h-770)/2;
+          var w = window.innerWidth;
+          var h = window.innerHeight;
+          mouseX = mouse_position.clientX - (w-770)/2;
+          mouseY = mouse_position.clientY - (h-770)/2;
 
-        indexOfSelectedDot = dotIndex(mouseX, mouseY);
+          indexOfSelectedDot = dotIndex(mouseX, mouseY);
 
-        // if player clicks whitespace do nothing
-        if (indexOfSelectedDot == null) {
-          {}
-        }
+          // if player clicks whitespace do nothing
+          if (indexOfSelectedDot == null) {
+            {}
+          }
 
-        // if player clicks on a dot
-        else if (indexOfSelectedDot != null) {
+          // if player clicks on a dot
+          else if (indexOfSelectedDot != null) {
 
-          rect_indexes_start = player_rects;
-          dotColor = dotList[indexOfSelectedDot].color;
+            rect_indexes_start = player_rects;
+            dotColor = dotList[indexOfSelectedDot].color;
 
-            if (playerClickedBlue(dotColor, dotList)) {
-              second_clicked = dotList[indexOfSelectedDot];
+              if (playerClickedBlue(dotColor, dotList)) {
+                second_clicked = dotList[indexOfSelectedDot];
 
-              // lines drawn
-              p1.push([first_clicked.x, first_clicked.y]);
-              p2.push([second_clicked.x, second_clicked.y]);
+                // lines drawn
+                p1.push([first_clicked.x, first_clicked.y]);
+                p2.push([second_clicked.x, second_clicked.y]);
 
-              // dots connected
-              connectedPairs.push([first_clicked.index, second_clicked.index]);
-              socket.emit('connectedPairs', connectedPairs)
+                // dots connected
+                connectedPairs.push([first_clicked.index, second_clicked.index]);
+                socket.emit('connectedPairs', connectedPairs)
 
-              // check surronding rectangles
-              wasRectFormed(getIndexesOfSurrondingDots(indexOfSelectedDot), indexOfSelectedDot, connectedPairs, player1_turn);
+                // check surronding rectangles
+                wasRectFormed(getIndexesOfSurrondingDots(indexOfSelectedDot), indexOfSelectedDot, connectedPairs, player1_turn);
 
-              rect_count_turn_end = player_rects.length;
-              rect_indexes_end = player_rects;
-              diff = rect_count_turn_end - rect_count_turn_start;
+                rect_count_turn_end = player_rects.length;
+                rect_indexes_end = player_rects;
+                diff = rect_count_turn_end - rect_count_turn_start;
+                console.log(rect_count_turn_end)
+                console.log(rect_count_turn_start)
+                console.log('player 1 diff ', diff)
 
-              if ( diff > 0) {
-                indexes_given_to_current_player = getUniqueIndexes(rect_indexes_start, rect_indexes_end, player1_turn)
-                rect_count_turn_start = player_rects.length
-                CalculatePlayerScore(dotList)
-                updatePlayerScore(CalculatePlayerScore(dotList))
+                if ( diff > 0) {
+                  indexes_given_to_current_player = getUniqueIndexes(rect_indexes_start, rect_indexes_end, player1_turn)
+                  rect_count_turn_start = player_rects.length
+                  CalculatePlayerScore(dotList)
+                  updatePlayerScore(CalculatePlayerScore(dotList))
+                }
+
+                else if ( diff == 0 ) {
+                  rect_count_turn_start = player_rects.length
+                  CalculatePlayerScore(dotList) 
+                  updatePlayerScore(CalculatePlayerScore(dotList))
+                  player1_turn = !player1_turn;
+
+                  //********************* multiplayer support *********************//
+                  socket.emit('turnChange', player1_turn)
+                  //********************* multiplayer support *********************//
+                  console.log(player1_turn)
+                  updatePlayerTurn()
+                  console.log('player turn end')
+                }
+
+                makeBlueDotsNormal(dotList);
               }
 
-              else if ( diff == 0 ) {
-                rect_count_turn_start = player_rects.length
-                CalculatePlayerScore(dotList) 
-                updatePlayerScore(CalculatePlayerScore(dotList))
-                player1_turn = !player1_turn;
+              else if (playerClickedOrange(dotColor, dotList)) {
+                getIndexesOfSurrondingDots(indexOfSelectedDot);
+                dontShowDotsAlreadyConnected(choice, connectedPairs, indexOfSelectedDot);
+                first_clicked = dotList[indexOfSelectedDot];
+                makeBlueDotsNormal(dotList)
+                showOptions(choice); 
 
-                //********************* multiplayer support *********************//
-                socket.emit('turnChange', player1_turn)
-                //********************* multiplayer support *********************//
-                
-                updatePlayerTurn()
-                console.log('player turn end')
-              }
+              };
+          };
 
-              makeBlueDotsNormal(dotList);
-            }
+          //********************* multiplayer support *********************//
+          socket.emit('drawLines', p1, p2)
+          socket.emit('drawPlayerRects', player_rects, dotList, state, dot)
+          socket.emit('drawDotList', dotList)  
+          // console.log(`${socket.id} emited three events`)   
+          //********************* multiplayer support *********************//
 
-            else if (playerClickedOrange(dotColor, dotList)) {
-              getIndexesOfSurrondingDots(indexOfSelectedDot);
-              dontShowDotsAlreadyConnected(choice, connectedPairs, indexOfSelectedDot);
-              first_clicked = dotList[indexOfSelectedDot];
-              makeBlueDotsNormal(dotList)
-              showOptions(choice); 
+          two.clear();
+          drawLines(p1,p2);
+          drawPlayerRects(player_rects, dotList, state, dot) // bg rects go here
+          drawDotList(dotList);
 
-            };
-        };
-
-        //********************* multiplayer support *********************//
-        socket.emit('drawLines', p1, p2)
-        socket.emit('drawPlayerRects', player_rects, dotList, state, dot)
-        socket.emit('drawDotList', dotList)  
-        console.log(`${socket.id} emited three events`)   
-        //********************* multiplayer support *********************//
-
-        two.clear();
-        drawLines(p1,p2);
-        drawPlayerRects(player_rects, dotList, state, dot) // bg rects go here
-        drawDotList(dotList);
         } else if (player_set_by_server == 'You are P2' && player1_turn == false) {
-          console.log('player 2 turn')
+
           // on click get mouseX and mouseY
-        var w = window.innerWidth;
-        var h = window.innerHeight;
-        mouseX = mouse_position.clientX - (w-770)/2;
-        mouseY = mouse_position.clientY - (h-770)/2;
+          var w = window.innerWidth;
+          var h = window.innerHeight;
+          mouseX = mouse_position.clientX - (w-770)/2;
+          mouseY = mouse_position.clientY - (h-770)/2;
 
-        indexOfSelectedDot = dotIndex(mouseX, mouseY);
+          indexOfSelectedDot = dotIndex(mouseX, mouseY);
 
-        // if player clicks whitespace do nothing
-        if (indexOfSelectedDot == null) {
-          {}
-        }
+          // if player clicks whitespace do nothing
+          if (indexOfSelectedDot == null) {
+            {}
+          }
 
-        // if player clicks on a dot
-        else if (indexOfSelectedDot != null) {
+          // if player clicks on a dot
+          else if (indexOfSelectedDot != null) {
 
-          rect_indexes_start = player_rects;
-          dotColor = dotList[indexOfSelectedDot].color;
+            rect_indexes_start = player_rects;
+            dotColor = dotList[indexOfSelectedDot].color;
 
-            if (playerClickedBlue(dotColor, dotList)) {
-              second_clicked = dotList[indexOfSelectedDot];
+              if (playerClickedBlue(dotColor, dotList)) {
+                second_clicked = dotList[indexOfSelectedDot];
 
-              // lines drawn
-              p1.push([first_clicked.x, first_clicked.y]);
-              p2.push([second_clicked.x, second_clicked.y]);
+                // lines drawn
+                p1.push([first_clicked.x, first_clicked.y]);
+                p2.push([second_clicked.x, second_clicked.y]);
 
-              // dots connected
-              connectedPairs.push([first_clicked.index, second_clicked.index]);
-              socket.emit('connectedPairs', connectedPairs)
+                // dots connected
+                connectedPairs.push([first_clicked.index, second_clicked.index]);
+                socket.emit('connectedPairs', connectedPairs)
 
-              // check surronding rectangles
-              wasRectFormed(getIndexesOfSurrondingDots(indexOfSelectedDot), indexOfSelectedDot, connectedPairs, player1_turn);
+                // check surronding rectangles
+                wasRectFormed(getIndexesOfSurrondingDots(indexOfSelectedDot), indexOfSelectedDot, connectedPairs, player1_turn);
 
-              rect_count_turn_end = player_rects.length;
-              rect_indexes_end = player_rects;
-              diff = rect_count_turn_end - rect_count_turn_start;
-
-              if ( diff > 0) {
-                indexes_given_to_current_player = getUniqueIndexes(rect_indexes_start, rect_indexes_end, player1_turn)
-                rect_count_turn_start = player_rects.length
-                CalculatePlayerScore(dotList)
-                updatePlayerScore(CalculatePlayerScore(dotList))
-              }
-
-              else if ( diff == 0 ) {
-                rect_count_turn_start = player_rects.length
-                CalculatePlayerScore(dotList) 
-                updatePlayerScore(CalculatePlayerScore(dotList))
-                player1_turn = !player1_turn;
-
-                //********************* multiplayer support *********************//
-                socket.emit('turnChange', player1_turn)
-                //********************* multiplayer support *********************//
+                rect_count_turn_end = player_rects.length;
+                rect_indexes_end = player_rects;
+                console.log(rect_count_turn_end)
+                console.log(rect_count_turn_start)
                 
-                updatePlayerTurn()
-                console.log('player turn end')
+                diff = rect_count_turn_end - rect_count_turn_start;
+                console.log('player 2 diff ', diff)
+
+                if ( diff > 0) {
+                  indexes_given_to_current_player = getUniqueIndexes(rect_indexes_start, rect_indexes_end, player1_turn)
+                  rect_count_turn_start = player_rects.length
+                  CalculatePlayerScore(dotList)
+                  updatePlayerScore(CalculatePlayerScore(dotList))
+                }
+
+                else if ( diff == 0 ) {
+                  rect_count_turn_start = player_rects.length
+                  CalculatePlayerScore(dotList) 
+                  updatePlayerScore(CalculatePlayerScore(dotList))
+                  player1_turn = !player1_turn;
+
+                  //********************* multiplayer support *********************//
+                  socket.emit('turnChange', player1_turn)
+                  //********************* multiplayer support *********************//
+                  
+                  updatePlayerTurn()
+                  console.log('player turn end')
+                }
+
+                makeBlueDotsNormal(dotList);
               }
 
-              makeBlueDotsNormal(dotList);
-            }
+              else if (playerClickedOrange(dotColor, dotList)) {
+                getIndexesOfSurrondingDots(indexOfSelectedDot);
+                dontShowDotsAlreadyConnected(choice, connectedPairs, indexOfSelectedDot);
+                first_clicked = dotList[indexOfSelectedDot];
+                makeBlueDotsNormal(dotList)
+                showOptions(choice); 
+              };
+          };
 
-            else if (playerClickedOrange(dotColor, dotList)) {
-              getIndexesOfSurrondingDots(indexOfSelectedDot);
-              dontShowDotsAlreadyConnected(choice, connectedPairs, indexOfSelectedDot);
-              first_clicked = dotList[indexOfSelectedDot];
-              makeBlueDotsNormal(dotList)
-              showOptions(choice); 
+          //********************* multiplayer support *********************//
+          socket.emit('drawLines', p1, p2)
+          socket.emit('drawPlayerRects', player_rects, dotList, state, dot)
+          socket.emit('drawDotList', dotList)  
+          // console.log(`${socket.id} emited three events`)   
+          //********************* multiplayer support *********************//
 
-            };
-        };
-
-        //********************* multiplayer support *********************//
-        socket.emit('drawLines', p1, p2)
-        socket.emit('drawPlayerRects', player_rects, dotList, state, dot)
-        socket.emit('drawDotList', dotList)  
-        console.log(`${socket.id} emited three events`)   
-        //********************* multiplayer support *********************//
-
-        two.clear();
-        drawLines(p1,p2);
-        drawPlayerRects(player_rects, dotList, state, dot) // bg rects go here
-        drawDotList(dotList);
-        }
-        //********************* multiplayer support *********************//
-
+          two.clear();
+          drawLines(p1,p2);
+          drawPlayerRects(player_rects, dotList, state, dot) // bg rects go here
+          drawDotList(dotList);
+          }
+          //********************* multiplayer support *********************//
       })
 
       function CalculatePlayerScore(dot_array) {
@@ -421,8 +425,6 @@
       }
 
       function updatePlayerTurn() {
-
-        // console.log(player1_turn)
         if (player1_turn == false) {
           document.getElementById("player_turn").innerHTML = 'Player turn: P2'
         } else if (player1_turn == true) {
