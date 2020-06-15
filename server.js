@@ -28,6 +28,10 @@ io.on('connection', (socket) => {
     } else {
         waitingPlayer = socket
         waitingPlayer.emit('waitMessage', 'Waiting for an opponent')
+        socket.on('disconnect', function() {
+            console.log(`${socket.id} has disconnected`)
+            waitingPlayer = null
+        })
     }
 })
 
