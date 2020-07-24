@@ -8,3 +8,5 @@ Made with:
 Javascript | HTML | CSS | Node | Two.js | Socket.io
 
 Screenshots:
+
+![](images/screenshot-2)
