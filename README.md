@@ -9,4 +9,4 @@ Javascript | HTML | CSS | Node | Two.js | Socket.io
 
 Screenshots:
 
-![](screenshots/screenshot-2)
+![](screenshots/screenshot-2.png)
