@@ -2,7 +2,7 @@
 
 * The link the to game can be found [here](https://gunkar-singh-indexes-game.herokuapp.com/)
 * Matchmaking is done automatically, you will be paired with the next person that opens the link above
-* Use a web browser to view
+* Only use a web browser to play
 * The app is deployed using Heroku's free tier and may time out during multiplayer
 
 Built with
