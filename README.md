@@ -1,7 +1,7 @@
 # Indexes
 
-* Link to game can be found [here](https://gunkar-singh-indexes-game.herokuapp.com/)
-* Match making is done automaticaly, you will be paried with the next person that opens the link above
+* The link the to game can be found [here](https://gunkar-singh-indexes-game.herokuapp.com/)
+* Matchmaking is done automatically, you will be paired with the next person that opens the link above
 * Use a web browser to view
 * The app is deployed using Heroku's free tier and may time out during multiplayer
 
@@ -67,12 +67,12 @@ Built with
 
 ## Key takeaway(s)
 
-Below are some lessons I learned during this project
+Below are some lessons I learned after this project
 
 <hr />
 
-* Game logic should run on server side rather than on client side. 
-   * Currently, game logic runs on client side. This is a security problem because someone could emit socket events to the server from the client and ruin any in progress games.
-   * Socket requests are heavy and contain a lot of unnessary data which at times can cause the game to time out. This problem could have been mitigated if game logic was located on the server. Currently, the entire "state" of the game is sent with each network request which is not optimal for performance.
+* Game logic should run on the server side rather than on the client side. 
+   * Currently, game logic runs on client side. This is a security problem because someone could emit socket events to the server from the client and ruin any games in progress.
+   * Socket requests are heavy and contain a lot of unnecessary data which at times caused the game to time out. This problem could have been mitigated if game logic was located on the server. Currently, the entire "state" of the game is sent with each network request which is not optimal for performance.
  * Statements in a function should belong to the same level of abstraction and functions should perform one task only. Doing so would maximize code reusaiblity and readability.
  * Methods are tighly coupled. Coupling could have been reduced by planning out game logic prior to development. 
