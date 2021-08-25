@@ -4,6 +4,7 @@
 * Matchmaking is done automatically, you will be paired with the next person that opens the link above
 * Only use a web browser to play
 * The app is deployed using Heroku's free tier and may time out during multiplayer
+* Scroll down for screen shots
 
 Built with
 * Javascript
